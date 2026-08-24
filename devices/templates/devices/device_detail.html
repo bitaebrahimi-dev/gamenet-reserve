@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+
+
+{% block content %}
+
+
+<h1>
+    {{ device.name }}
+</h1>
+
+
+<p>
+    نوع دستگاه:
+    {{ device.get_device_type_display }}
+</p>
+
+
+<p>
+    قیمت هر ساعت:
+    {{ device.hourly_price }}
+    تومان
+</p>
+
+
+<p>
+    توضیحات:
+    {{ device.description }}
+</p>
+
+
+<p>
+    وضعیت:
+
+    {% if device.is_active %}
+
+        فعال
+
+    {% else %}
+
+        غیرفعال
+
+    {% endif %}
+
+</p>
+
+
+<a href="{% url 'reservation_create' device.id %}">
+    رزرو این دستگاه
+</a>
+
+
+{% endblock %}

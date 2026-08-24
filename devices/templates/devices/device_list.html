@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+
+
+{% block content %}
+
+
+<h1>
+    لیست دستگاه‌های گیم‌نت
+</h1>
+
+
+{% for device in devices %}
+
+
+    <h2>
+        <a href="{% url 'device_detail' device.id %}">
+            {{ device.name }}
+        </a>
+    </h2>
+
+
+    <p>
+        نوع دستگاه:
+        {{ device.get_device_type_display }}
+    </p>
+
+
+    <p>
+        قیمت هر ساعت:
+        {{ device.hourly_price }}
+        تومان
+    </p>
+
+
+    <p>
+        توضیحات:
+        {{ device.description }}
+    </p>
+
+
+    <p>
+        وضعیت:
+
+        {% if device.is_active %}
+
+            فعال
+
+        {% else %}
+
+            غیرفعال
+
+        {% endif %}
+
+    </p>
+
+
+    <hr>
+
+
+{% empty %}
+
+
+    <p>
+        در حال حاضر دستگاهی ثبت نشده است.
+    </p>
+
+
+{% endfor %}
+
+
+{% endblock %}

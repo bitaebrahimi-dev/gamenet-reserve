@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<h2>رزروهای من</h2>
+
+<hr>
+
+{% for reservation in reservations %}
+
+    <div>
+
+        <p>
+            دستگاه:
+            {{ reservation.device.name }}
+        </p>
+
+        <p>
+            تاریخ رزرو:
+            {{ reservation.reservation_date }}
+        </p>
+
+        <p>
+            ساعت شروع:
+            {{ reservation.start_time }}
+        </p>
+
+        <p>
+            ساعت پایان:
+            {{ reservation.end_time }}
+        </p>
+
+        <p>
+            وضعیت:
+            {{ reservation.get_status_display }}
+        </p>
+
+        <hr>
+
+    </div>
+
+{% empty %}
+
+    <p>شما هنوز هیچ رزروی ثبت نکرده‌اید.</p>
+
+{% endfor %}
+
+{% endblock %}

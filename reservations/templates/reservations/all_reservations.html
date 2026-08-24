@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<h2>همه رزروها</h2>
+
+{% for reservation in reservations %}
+
+    <p>
+        کاربر:
+        {{ reservation.user.username }}
+    </p>
+
+    <p>
+        دستگاه:
+        {{ reservation.device.name }}
+    </p>
+
+    <p>
+        تاریخ:
+        {{ reservation.reservation_date }}
+    </p>
+
+    <p>
+        وضعیت:
+        {{ reservation.get_status_display }}
+    </p>
+
+    <hr>
+
+{% empty %}
+
+    <p>هیچ رزروی وجود ندارد.</p>
+
+{% endfor %}
+
+{% endblock %}
