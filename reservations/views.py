@@ -5,6 +5,9 @@ from django.contrib import messages
 from .models import Reservation
 from django.contrib.auth.decorators import login_required
 from accounts.decorators import manager_required
+from .services import create_reservation
+from django.core.exceptions import ValidationError
+
 
 
 @login_required
@@ -16,14 +19,31 @@ def reservation_create(request, device_id):
         form = ReservationForm(request.POST)
 
         if form.is_valid():
-            reservation = form.save(commit=False)
 
-            reservation.user = request.user
-            reservation.device = device
+            try:
 
-            reservation.save()
-            messages.success(request, 'رزرو شما با موفقیت ثبت شد.')
-            return redirect('device_detail', device.id)
+                create_reservation(
+                    form=form,
+                    user=request.user,
+                    device=device
+                )
+
+                messages.success(
+                    request,
+                    'رزرو شما با موفقیت ثبت شد.'
+                )
+
+                return redirect(
+                    'device_detail',
+                    device.id
+                )
+
+            except ValidationError as e:
+
+                form.add_error(
+                    None,
+                    e
+                )
 
     else:
 
