@@ -5,9 +5,11 @@ from django.contrib import messages
 from .models import Reservation
 from django.contrib.auth.decorators import login_required
 from accounts.decorators import manager_required
-from .services import create_reservation
 from django.core.exceptions import ValidationError
-
+from .services import (
+    create_reservation,
+    update_reservation_status
+)
 
 
 @login_required
@@ -56,6 +58,40 @@ def reservation_create(request, device_id):
     )
 
 
+@manager_required
+def update_reservation_status_view(request, reservation_id):
+
+    reservation = get_object_or_404(
+        Reservation,
+        id=reservation_id
+    )
+
+    if request.method == 'POST':
+
+        status = request.POST.get('status')
+
+        try:
+
+            update_reservation_status(
+                reservation=reservation,
+                status=status
+            )
+
+            messages.success(
+                request,
+                'وضعیت رزرو با موفقیت تغییر کرد.'
+            )
+
+        except ValidationError as e:
+
+            messages.error(
+                request,
+                e.message
+            )
+
+    return redirect('all_reservations')
+
+
 @login_required
 def my_reservations(request):
     reservations = Reservation.objects.filter(
@@ -79,3 +115,5 @@ def all_reservations(request):
         'reservations/all_reservations.html',
         {'reservations': reservations}
     )
+
+

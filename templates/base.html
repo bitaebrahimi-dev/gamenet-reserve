@@ -9,49 +9,58 @@
 <body>
 
 
-    {% if messages %}
+{% if messages %}
 
-        {% for message in messages %}
+{% for message in messages %}
 
-            <p>
+<p>
 
-                {{ message }}
-            </p>
+    {{ message }}
+</p>
 
-        {% endfor %}
+{% endfor %}
 
-    {% endif %}
-    <nav>
+{% endif %}
+<nav>
 
-        <a href="{% url 'device_list' %}">
+    <a href="{% url 'device_list' %}">
         دستگاها
-        </a>
+    </a>
 
     |
 
     {% if user.is_authenticated %}
+    {% if user.profile.role == 'MANAGER' %}
 
-        <a href="{% url 'my_reservations' %}">
-            رزروهای من
-        </a>
+    <a href="{% url 'all_reservations' %}">
+        مدیریت رزروها
+    </a>
 
-        |
+    |
 
-        <a href="{% url 'logout' %}">
-            خروج
-        </a>
+    {% endif %}
+
+    <a href="{% url 'my_reservations' %}">
+        رزروهای من
+    </a>
+
+    |
+
+    <a href="{% url 'logout' %}">
+        خروج
+    </a>
 
     {% else %}
 
-        <a href="{% url 'login' %}">
-            ورود
-        </a>
+    <a href="{% url 'login' %}">
+        ورود
+    </a>
 
-        |
+    |
 
-        <a href="{% url 'register' %}">
-            ثبت‌نام
-        </a>
+    <a href="{% url 'register' %}">
+        ثبت‌نام
+    </a>
 
     {% endif %}
 
@@ -60,10 +69,9 @@
 <hr>
 
 
+{% block content %}
 
-    {% block content %}
-
-    {% endblock %}
+{% endblock %}
 
 
 </body>
