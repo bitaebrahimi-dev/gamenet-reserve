@@ -1,37 +1,30 @@
-from .models import Reservation
 from django.core.exceptions import ValidationError
-from django.utils import timezone
 
+from .validators import (
+    validate_device_availability,
+    validate_reservation_date,
+    validate_reservation_time,
+    validate_reservation_conflict,
+)
 
 def create_reservation(form, user, device):
     reservation = form.save(commit=False)
 
-    if reservation.reservation_date < timezone.localdate():
-        raise ValidationError(
-            'تاریخ رزرو نمی‌تواند گذشته باشد.'
-        )
+    validate_device_availability(device)
 
-    if reservation.end_time <= reservation.start_time:
-        raise ValidationError(
+    validate_reservation_date(reservation)
 
-            'ساعت پایان باید بعد از ساعت شروع باشد.'
-        )
+    validate_reservation_time(reservation)
 
-    existing_reservation = Reservation.objects.filter(
-        device=device,
-        reservation_date=reservation.reservation_date,
-        start_time__lt=reservation.end_time,
-        end_time__gt=reservation.start_time,
-    ).exists()
-
-    if existing_reservation:
-        raise ValidationError(
-            'این دستگاه در این بازه زمانی قبلاً رزرو شده است.'
-        )
-
+    validate_reservation_conflict(
+        reservation,
+        device
+    )
+    # اتصال اطلاعات رزرو
     reservation.user = user
     reservation.device = device
 
+    # ذخیره رزرو
     reservation.save()
 
     return reservation
@@ -42,11 +35,16 @@ def update_reservation_status(reservation, status):
         raise ValidationError(
             'وضعیت انتخاب شده معتبر نیست.'
         )
+
     if reservation.status != 'pending':
         raise ValidationError(
             'این رزرو قبلاً تعیین تکلیف شده است.'
         )
+
     reservation.status = status
-    reservation.save(update_fields=['status'])
+
+    reservation.save(
+        update_fields=['status']
+    )
 
     return reservation
