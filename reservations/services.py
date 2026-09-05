@@ -1,4 +1,5 @@
 from django.core.exceptions import ValidationError
+from .workflow import can_transition
 
 from .validators import (
     validate_device_availability,
@@ -31,15 +32,15 @@ def create_reservation(form, user, device):
 
 
 def update_reservation_status(reservation, status):
-    if status not in ['confirmed', 'cancelled']:
+
+    if not can_transition(
+        reservation.status,
+        status
+    ):
         raise ValidationError(
-            'وضعیت انتخاب شده معتبر نیست.'
+            'تغییر وضعیت رزرو مجاز نیست.'
         )
 
-    if reservation.status != 'pending':
-        raise ValidationError(
-            'این رزرو قبلاً تعیین تکلیف شده است.'
-        )
 
     reservation.status = status
 

@@ -37,9 +37,7 @@ def validate_reservation_conflict(reservation, device):
 
 
 def validate_device_availability(device):
-    """
-    بررسی می‌کند دستگاه قابل رزرو باشد.
-    """
+
 
     if not device.is_active:
         raise ValidationError(
