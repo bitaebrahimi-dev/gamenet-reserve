@@ -6,7 +6,7 @@ ALLOWED_TRANSITIONS = {
     ],
 
     'confirmed': [
-        'completed',
+
         'cancelled',
     ],
 
