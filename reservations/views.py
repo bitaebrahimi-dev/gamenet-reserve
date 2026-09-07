@@ -4,7 +4,7 @@ from devices.models import Device
 from django.contrib import messages
 from .models import Reservation
 from django.contrib.auth.decorators import login_required
-from accounts.decorators import manager_required
+from accounts.decorators import role_required
 from django.core.exceptions import ValidationError
 from .services import (
     create_reservation,
@@ -60,7 +60,7 @@ def reservation_create(request, device_id):
     )
 
 
-@manager_required
+@role_required('MANAGER')
 def update_reservation_status_view(request, reservation_id):
     reservation = get_object_or_404(
         Reservation,
@@ -138,7 +138,9 @@ def cancel_my_reservation(request, reservation_id):
         )
 
     return redirect('my_reservations')
-@manager_required
+
+
+@role_required('MANAGER')
 def all_reservations(request):
     reservations = Reservation.objects.all()
 
