@@ -1,5 +1,6 @@
 from django.core.exceptions import ValidationError
 from .workflow import can_transition
+from .models import Reservation, ReservationHistory
 
 from .validators import (
     validate_device_availability,
@@ -7,6 +8,7 @@ from .validators import (
     validate_reservation_time,
     validate_reservation_conflict,
 )
+
 
 def create_reservation(form, user, device):
     reservation = form.save(commit=False)
@@ -31,21 +33,62 @@ def create_reservation(form, user, device):
     return reservation
 
 
-def update_reservation_status(reservation, status):
-
+def update_reservation_status(
+        reservation,
+        status,
+        user,
+        reason=''
+):
     if not can_transition(
-        reservation.status,
-        status
+            reservation.status,
+            status
     ):
         raise ValidationError(
             'تغییر وضعیت رزرو مجاز نیست.'
         )
 
+    old_status = reservation.status
 
     reservation.status = status
 
     reservation.save(
         update_fields=['status']
     )
+
+    ReservationHistory.objects.create(
+        reservation=reservation,
+        old_status=old_status,
+        new_status=status,
+        changed_by=user,
+        reason=reason
+    )
+
+    return reservation
+
+
+def cancel_reservation_by_customer(
+        reservation,
+        user
+):
+
+    if reservation.user != user:
+        raise ValidationError(
+            'شما اجازه لغو این رزرو را ندارید.'
+        )
+
+
+    if reservation.status != 'pending':
+        raise ValidationError(
+            'این رزرو قابل لغو نیست.'
+        )
+
+
+    update_reservation_status(
+        reservation=reservation,
+        status='cancelled',
+        user=user,
+        reason='لغو توسط مشتری'
+    )
+
 
     return reservation

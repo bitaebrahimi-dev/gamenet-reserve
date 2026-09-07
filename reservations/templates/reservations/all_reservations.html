@@ -26,31 +26,62 @@
         {{ reservation.get_status_display }}
     </p>
 
+
     {% if reservation.status == 'pending' %}
+
+        <!-- تایید رزرو -->
 
         <form method="post" action="{% url 'update_reservation_status' reservation.id %}">
             {% csrf_token %}
 
-            <input type="hidden" name="status" value="confirmed">
+            <input
+                type="hidden"
+                name="status"
+                value="confirmed"
+            >
 
             <button type="submit">
                 تأیید رزرو
             </button>
+
         </form>
+
+
+        <!-- لغو رزرو -->
 
         <form method="post" action="{% url 'update_reservation_status' reservation.id %}">
             {% csrf_token %}
 
-            <input type="hidden" name="status" value="cancelled">
+            <input
+                type="hidden"
+                name="status"
+                value="cancelled"
+            >
+
+
+            <label for="reason">
+                دلیل لغو:
+            </label>
+
+
+            <textarea
+                id="reason"
+                name="reason"
+            ></textarea>
+
 
             <button type="submit">
                 لغو رزرو
             </button>
+
         </form>
+
 
     {% endif %}
 
+
     <hr>
+
 
 {% empty %}
 

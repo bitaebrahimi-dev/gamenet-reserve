@@ -3,7 +3,8 @@ from .views import (
     reservation_create,
     my_reservations,
     all_reservations,
-    update_reservation_status_view
+    update_reservation_status_view,
+    cancel_my_reservation
 )
 
 urlpatterns = [
@@ -22,5 +23,10 @@ urlpatterns = [
         'update-status/<int:reservation_id>/',
         update_reservation_status_view,
         name='update_reservation_status'
+    ),
+    path(
+        'cancel/<int:reservation_id>/',
+        cancel_my_reservation,
+        name='cancel_my_reservation'
     ),
 ]
