@@ -91,6 +91,18 @@ class ReservationHistory(models.Model):
         verbose_name='زمان تغییر'
     )
 
+    class Meta:
+        permissions = [
+            (
+                'can_view_all_reservations',
+                'Can view all reservations'
+            ),
+            (
+                'can_change_reservation_status',
+                'Can change reservation status'
+            ),
+        ]
+
 
     def __str__(self):
         return (

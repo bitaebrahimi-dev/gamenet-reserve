@@ -1,22 +1,31 @@
 from django.shortcuts import render, get_object_or_404, redirect
+
 from .forms import ReservationForm
 from devices.models import Device
+
 from django.contrib import messages
 from .models import Reservation
-from django.contrib.auth.decorators import login_required
-from accounts.decorators import role_required
+
+from django.contrib.auth.decorators import (
+    login_required,
+    permission_required
+)
+
 from django.core.exceptions import ValidationError
+
 from .services import (
     create_reservation,
     update_reservation_status,
     cancel_reservation_by_customer,
-
 )
 
 
 @login_required
 def reservation_create(request, device_id):
-    device = get_object_or_404(Device, id=device_id)
+    device = get_object_or_404(
+        Device,
+        id=device_id
+    )
 
     if request.method == 'POST':
 
@@ -60,7 +69,11 @@ def reservation_create(request, device_id):
     )
 
 
-@role_required('MANAGER')
+@permission_required(
+    'reservations.can_change_reservation_status',
+    raise_exception=True
+)
+@login_required
 def update_reservation_status_view(request, reservation_id):
     reservation = get_object_or_404(
         Reservation,
@@ -70,6 +83,7 @@ def update_reservation_status_view(request, reservation_id):
     if request.method == 'POST':
 
         status = request.POST.get('status')
+
         reason = request.POST.get('reason')
 
         try:
@@ -79,13 +93,13 @@ def update_reservation_status_view(request, reservation_id):
                 status=status,
                 user=request.user,
                 reason=reason,
-
             )
 
             messages.success(
                 request,
                 'وضعیت رزرو با موفقیت تغییر کرد.'
             )
+
 
         except ValidationError as e:
 
@@ -94,7 +108,9 @@ def update_reservation_status_view(request, reservation_id):
                 e.message
             )
 
-    return redirect('all_reservations')
+    return redirect(
+        'all_reservations'
+    )
 
 
 @login_required
@@ -112,7 +128,6 @@ def my_reservations(request):
 
 @login_required
 def cancel_my_reservation(request, reservation_id):
-
     reservation = get_object_or_404(
         Reservation,
         id=reservation_id
@@ -130,6 +145,7 @@ def cancel_my_reservation(request, reservation_id):
             'رزرو شما با موفقیت لغو شد.'
         )
 
+
     except ValidationError as e:
 
         messages.error(
@@ -137,10 +153,16 @@ def cancel_my_reservation(request, reservation_id):
             e.message
         )
 
-    return redirect('my_reservations')
+    return redirect(
+        'my_reservations'
+    )
 
 
-@role_required('MANAGER')
+@permission_required(
+    'reservations.can_view_all_reservations',
+    raise_exception=True
+)
+@login_required
 def all_reservations(request):
     reservations = Reservation.objects.all()
 
