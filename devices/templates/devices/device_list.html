@@ -54,6 +54,15 @@
     </p>
 
 
+    {% if perms.devices.change_device %}
+
+        <a href="{% url 'device_update' device.id %}">
+            ویرایش دستگاه
+        </a>
+
+    {% endif %}
+
+
     <hr>
 
 

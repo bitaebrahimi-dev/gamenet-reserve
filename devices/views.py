@@ -61,3 +61,48 @@ def device_create(request):
         'devices/device_form.html',
         {'form': form}
     )
+
+
+@login_required
+@permission_required(
+    'devices.change_device',
+    raise_exception=True
+)
+def device_update(request, device_id):
+
+    device = get_object_or_404(
+        Device,
+        id=device_id
+    )
+
+    if request.method == 'POST':
+
+        form = DeviceForm(
+            request.POST,
+            instance=device
+        )
+
+        if form.is_valid():
+
+            form.save()
+
+            messages.success(
+                request,
+                'دستگاه با موفقیت ویرایش شد.'
+            )
+
+            return redirect(
+                'device_list'
+            )
+
+    else:
+
+        form = DeviceForm(
+            instance=device
+        )
+
+    return render(
+        request,
+        'devices/device_form.html',
+        {'form': form}
+    )
