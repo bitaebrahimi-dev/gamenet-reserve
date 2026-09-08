@@ -30,7 +30,7 @@
     |
 
     {% if user.is_authenticated %}
-    {% if user.profile.role == 'MANAGER' %}
+    {% if perms.reservations.can_view_all_reservations %}
 
     <a href="{% url 'all_reservations' %}">
         مدیریت رزروها
