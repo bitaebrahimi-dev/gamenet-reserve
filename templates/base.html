@@ -11,60 +11,80 @@
 
 {% if messages %}
 
-{% for message in messages %}
+    {% for message in messages %}
 
-<p>
+        <p>
+            {{ message }}
+        </p>
 
-    {{ message }}
-</p>
-
-{% endfor %}
+    {% endfor %}
 
 {% endif %}
+
+
 <nav>
 
     <a href="{% url 'device_list' %}">
-        دستگاها
+        دستگاه‌ها
     </a>
 
     |
+
 
     {% if user.is_authenticated %}
-    {% if perms.reservations.can_view_all_reservations %}
 
-    <a href="{% url 'all_reservations' %}">
-        مدیریت رزروها
-    </a>
 
-    |
+        {% if perms.reservations.can_view_all_reservations %}
 
-    {% endif %}
+            <a href="{% url 'all_reservations' %}">
+                مدیریت رزروها
+            </a>
 
-    <a href="{% url 'my_reservations' %}">
-        رزروهای من
-    </a>
+            |
 
-    |
+        {% endif %}
 
-    <a href="{% url 'logout' %}">
-        خروج
-    </a>
+
+        {% if perms.devices.add_device %}
+
+            <a href="{% url 'device_create' %}">
+                افزودن دستگاه
+            </a>
+
+            |
+
+        {% endif %}
+
+
+        <a href="{% url 'my_reservations' %}">
+            رزروهای من
+        </a>
+
+        |
+
+        <a href="{% url 'logout' %}">
+            خروج
+        </a>
+
 
     {% else %}
 
-    <a href="{% url 'login' %}">
-        ورود
-    </a>
 
-    |
+        <a href="{% url 'login' %}">
+            ورود
+        </a>
 
-    <a href="{% url 'register' %}">
-        ثبت‌نام
-    </a>
+        |
+
+        <a href="{% url 'register' %}">
+            ثبت‌نام
+        </a>
+
 
     {% endif %}
 
 </nav>
+
 
 <hr>
 

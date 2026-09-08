@@ -1,5 +1,11 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from .models import Device
+from django.contrib import messages
+from django.contrib.auth.decorators import (
+    login_required,
+    permission_required
+)
+from .forms import DeviceForm
 
 
 def device_detail(request, device_id):
@@ -19,4 +25,39 @@ def device_list(request):
         request,
         'devices/device_list.html',
         {'devices': devices}
+    )
+
+
+@login_required
+@permission_required(
+    'devices.add_device',
+    raise_exception=True
+)
+def device_create(request):
+
+    if request.method == 'POST':
+
+        form = DeviceForm(request.POST)
+
+        if form.is_valid():
+
+            form.save()
+
+            messages.success(
+                request,
+                'دستگاه با موفقیت اضافه شد.'
+            )
+
+            return redirect(
+                'device_list'
+            )
+
+    else:
+
+        form = DeviceForm()
+
+    return render(
+        request,
+        'devices/device_form.html',
+        {'form': form}
     )
