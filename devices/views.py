@@ -9,7 +9,21 @@ from .forms import DeviceForm
 
 
 def device_detail(request, device_id):
-    device = get_object_or_404(Device, id=device_id)
+
+    if request.user.has_perm('devices.change_device'):
+
+        device = get_object_or_404(
+            Device,
+            id=device_id
+        )
+
+    else:
+
+        device = get_object_or_404(
+            Device,
+            id=device_id,
+            is_active=True
+        )
 
     return render(
         request,
@@ -19,7 +33,12 @@ def device_detail(request, device_id):
 
 
 def device_list(request):
-    devices = Device.objects.all()
+    if request.user.has_perm('devices.change_device'):
+        devices = Device.objects.all()
+    else:
+        devices = Device.objects.filter(
+            is_active=True
+        )
 
     return render(
         request,
@@ -34,13 +53,11 @@ def device_list(request):
     raise_exception=True
 )
 def device_create(request):
-
     if request.method == 'POST':
 
         form = DeviceForm(request.POST)
 
         if form.is_valid():
-
             form.save()
 
             messages.success(
@@ -69,7 +86,6 @@ def device_create(request):
     raise_exception=True
 )
 def device_update(request, device_id):
-
     device = get_object_or_404(
         Device,
         id=device_id
@@ -83,7 +99,6 @@ def device_update(request, device_id):
         )
 
         if form.is_valid():
-
             form.save()
 
             messages.success(
