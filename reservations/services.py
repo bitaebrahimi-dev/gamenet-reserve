@@ -1,6 +1,7 @@
 from django.core.exceptions import ValidationError
 from .workflow import can_transition
 from .models import Reservation, ReservationHistory
+from django.db import transaction
 
 from .validators import (
     validate_device_availability,
@@ -49,19 +50,20 @@ def update_reservation_status(
 
     old_status = reservation.status
 
-    reservation.status = status
+    with transaction.atomic():
+        reservation.status = status
 
-    reservation.save(
-        update_fields=['status']
-    )
+        reservation.save(
+            update_fields=['status']
+        )
 
-    ReservationHistory.objects.create(
-        reservation=reservation,
-        old_status=old_status,
-        new_status=status,
-        changed_by=user,
-        reason=reason
-    )
+        ReservationHistory.objects.create(
+            reservation=reservation,
+            old_status=old_status,
+            new_status=status,
+            changed_by=user,
+            reason=reason
+        )
 
     return reservation
 
@@ -70,18 +72,15 @@ def cancel_reservation_by_customer(
         reservation,
         user
 ):
-
     if reservation.user != user:
         raise ValidationError(
             'شما اجازه لغو این رزرو را ندارید.'
         )
 
-
     if reservation.status != 'pending':
         raise ValidationError(
             'این رزرو قابل لغو نیست.'
         )
-
 
     update_reservation_status(
         reservation=reservation,
@@ -89,6 +88,5 @@ def cancel_reservation_by_customer(
         user=user,
         reason='لغو توسط مشتری'
     )
-
 
     return reservation
