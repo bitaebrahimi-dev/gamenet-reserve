@@ -10,6 +10,7 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
 from .serializers import DeviceSerializer
+from rest_framework import status
 
 
 def device_detail(request, device_id):
@@ -126,37 +127,90 @@ def device_update(request, device_id):
     )
 
 
-@api_view(["GET"])
+@api_view(["GET", "POST"])
 def device_list_api(request):
-    if request.user.has_perm('devices.change_device'):
-        devices = Device.objects.all()
-    else:
-        devices = Device.objects.filter(
-            is_active=True
+    if request.method == "GET":
+        if request.user.has_perm('devices.change_device'):
+            devices = Device.objects.all()
+        else:
+            devices = Device.objects.filter(
+                is_active=True
+            )
+
+        serializer = DeviceSerializer(
+            devices,
+            many=True
         )
 
-    serializer = DeviceSerializer(
-        devices,
-        many=True
-    )
+        return Response(serializer.data)
 
-    return Response(serializer.data)
+    if request.method == "POST":
+        serializer = DeviceSerializer(
+            data=request.data
+        )
+
+        if serializer.is_valid():
+            serializer.save()
+
+            return Response(
+                serializer.data,
+                status=status.HTTP_201_CREATED
+            )
+
+        return Response(
+            serializer.errors,
+            status=status.HTTP_400_BAD_REQUEST
+        )
 
 
-@api_view(["GET"])
+@api_view(["GET", "PATCH"])
 def device_detail_api(request, device_id):
-    if request.user.has_perm('devices.change_device'):
+    if request.method == "GET":
+        if request.user.has_perm('devices.change_device'):
+            device = get_object_or_404(
+                Device,
+                id=device_id
+            )
+        else:
+            device = get_object_or_404(
+                Device,
+                id=device_id,
+                is_active=True
+            )
+
+        serializer = DeviceSerializer(device)
+
+        return Response(serializer.data)
+
+    if request.method == "PATCH":
+        if not request.user.has_perm('devices.change_device'):
+            return Response(
+                {
+                    "detail": "You do not have permission to update this device."
+                },
+                status=status.HTTP_403_FORBIDDEN
+            )
+
         device = get_object_or_404(
             Device,
             id=device_id
         )
-    else:
-        device = get_object_or_404(
-            Device,
-            id=device_id,
-            is_active=True
+
+        serializer = DeviceSerializer(
+            device,
+            data=request.data,
+            partial=True
         )
 
-    serializer = DeviceSerializer(device)
+        if serializer.is_valid():
+            serializer.save()
 
-    return Response(serializer.data)
+            return Response(
+                serializer.data,
+                status=status.HTTP_200_OK
+            )
+
+        return Response(
+            serializer.errors,
+            status=status.HTTP_400_BAD_REQUEST
+        )
