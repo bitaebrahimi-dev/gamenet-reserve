@@ -4,9 +4,9 @@ from .views import (
     device_list,
     device_detail,
     device_create,
-    device_update
+    device_update,
+    device_list_api
 )
-
 
 urlpatterns = [
 
@@ -33,5 +33,9 @@ urlpatterns = [
         device_detail,
         name='device_detail'
     ),
-
+    path(
+        "api/devices/",
+        device_list_api,
+        name="device_list_api"
+    ),
 ]

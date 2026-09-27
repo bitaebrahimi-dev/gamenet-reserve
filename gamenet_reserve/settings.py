@@ -32,6 +32,7 @@ INSTALLED_APPS = [
     'accounts.apps.AccountsConfig',
     'devices',
     'reservations',
+    'rest_framework',
 ]
 
 

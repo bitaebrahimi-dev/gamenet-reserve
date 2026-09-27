@@ -6,10 +6,13 @@ from django.contrib.auth.decorators import (
     permission_required
 )
 from .forms import DeviceForm
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+
+from .serializers import DeviceSerializer
 
 
 def device_detail(request, device_id):
-
     if request.user.has_perm('devices.change_device'):
 
         device = get_object_or_404(
@@ -121,3 +124,20 @@ def device_update(request, device_id):
         'devices/device_form.html',
         {'form': form}
     )
+
+
+@api_view(["GET"])
+def device_list_api(request):
+    if request.user.has_perm('devices.change_device'):
+        devices = Device.objects.all()
+    else:
+        devices = Device.objects.filter(
+            is_active=True
+        )
+
+    serializer = DeviceSerializer(
+        devices,
+        many=True
+    )
+
+    return Response(serializer.data)
