@@ -141,3 +141,22 @@ def device_list_api(request):
     )
 
     return Response(serializer.data)
+
+
+@api_view(["GET"])
+def device_detail_api(request, device_id):
+    if request.user.has_perm('devices.change_device'):
+        device = get_object_or_404(
+            Device,
+            id=device_id
+        )
+    else:
+        device = get_object_or_404(
+            Device,
+            id=device_id,
+            is_active=True
+        )
+
+    serializer = DeviceSerializer(device)
+
+    return Response(serializer.data)
