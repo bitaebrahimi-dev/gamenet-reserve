@@ -28,7 +28,10 @@ urlpatterns = [
         "api/devices/",
         include("devices.api_urls")
     ),
-
+    path(
+        "api/",
+        include("reservations.api_urls")
+    ),
 ]
 
 urlpatterns += static(

@@ -18,6 +18,15 @@ from .services import (
     update_reservation_status,
     cancel_reservation_by_customer,
 )
+from rest_framework.decorators import (
+    api_view,
+    permission_classes,
+)
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework import status
+
+from .serializers import ReservationSerializer
 
 
 @login_required
@@ -36,11 +45,10 @@ def reservation_create(request, device_id):
             try:
 
                 create_reservation(
-                    form=form,
                     user=request.user,
-                    device=device
+                    device=device,
+                    **form.cleaned_data
                 )
-
                 messages.success(
                     request,
                     'رزرو شما با موفقیت ثبت شد.'
@@ -170,4 +178,47 @@ def all_reservations(request):
         request,
         'reservations/all_reservations.html',
         {'reservations': reservations}
+    )
+
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def reservation_create_api(request, device_id):
+    device = get_object_or_404(
+        Device,
+        id=device_id
+    )
+
+    serializer = ReservationSerializer(
+        data=request.data
+    )
+
+    if not serializer.is_valid():
+        return Response(
+            serializer.errors,
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    try:
+        reservation = create_reservation(
+            user=request.user,
+            device=device,
+            **serializer.validated_data
+        )
+
+    except ValidationError as e:
+        return Response(
+            {
+                "detail": e.messages[0]
+            },
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    output_serializer = ReservationSerializer(
+        reservation
+    )
+
+    return Response(
+        output_serializer.data,
+        status=status.HTTP_201_CREATED
     )

@@ -11,8 +11,20 @@ from .validators import (
 )
 
 
-def create_reservation(form, user, device):
-    reservation = form.save(commit=False)
+def create_reservation(
+        user,
+        device,
+        reservation_date,
+        start_time,
+        end_time
+):
+    reservation = Reservation(
+        user=user,
+        device=device,
+        reservation_date=reservation_date,
+        start_time=start_time,
+        end_time=end_time
+    )
 
     validate_device_availability(device)
 
@@ -24,15 +36,10 @@ def create_reservation(form, user, device):
         reservation,
         device
     )
-    # اتصال اطلاعات رزرو
-    reservation.user = user
-    reservation.device = device
 
-    # ذخیره رزرو
     reservation.save()
 
     return reservation
-
 
 def update_reservation_status(
         reservation,
