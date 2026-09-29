@@ -1,7 +1,6 @@
 from rest_framework import serializers
 
-from .models import Reservation
-
+from .models import Reservation, ReservationHistory
 
 class ReservationSerializer(serializers.ModelSerializer):
 
@@ -39,3 +38,16 @@ class ReservationStatusSerializer(serializers.Serializer):
         default=""
     )
 
+
+class ReservationHistorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ReservationHistory
+        fields = [
+            "id",
+            "reservation",
+            "old_status",
+            "new_status",
+            "changed_by",
+            "reason",
+            "created_at",
+        ]

@@ -29,7 +29,15 @@ from rest_framework import status
 from .serializers import (
     ReservationSerializer,
     ReservationStatusSerializer,
+    ReservationHistorySerializer,
 )
+from .selectors import (
+    get_user_reservations,
+    get_all_reservations,
+    get_user_reservation,
+    get_reservation_history,
+)
+
 
 @login_required
 def reservation_create(request, device_id):
@@ -125,8 +133,8 @@ def update_reservation_status_view(request, reservation_id):
 
 @login_required
 def my_reservations(request):
-    reservations = Reservation.objects.filter(
-        user=request.user
+    reservations = get_user_reservations(
+        request.user
     )
 
     return render(
@@ -168,13 +176,13 @@ def cancel_my_reservation(request, reservation_id):
     )
 
 
+@login_required
 @permission_required(
     'reservations.can_view_all_reservations',
     raise_exception=True
 )
-@login_required
 def all_reservations(request):
-    reservations = Reservation.objects.all()
+    reservations = get_all_reservations()
 
     return render(
         request,
@@ -309,5 +317,102 @@ def update_reservation_status_api(request, reservation_id):
 
     return Response(
         output_serializer.data,
+        status=status.HTTP_200_OK
+    )
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def my_reservations_api(request):
+    reservations = get_user_reservations(
+        request.user
+    )
+
+    serializer = ReservationSerializer(
+        reservations,
+        many=True
+    )
+
+    return Response(
+        serializer.data,
+        status=status.HTTP_200_OK
+    )
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def reservation_detail_api(request, reservation_id):
+    reservation = get_user_reservation(
+        request.user,
+        reservation_id
+    )
+
+    if reservation is None:
+        return Response(
+            {"detail": "رزرو پیدا نشد."},
+            status=status.HTTP_404_NOT_FOUND
+        )
+
+    serializer = ReservationSerializer(
+        reservation
+    )
+
+    return Response(
+        serializer.data,
+        status=status.HTTP_200_OK
+    )
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def all_reservations_api(request):
+    if not request.user.has_perm(
+        "reservations.can_view_all_reservations"
+    ):
+        return Response(
+            {"detail": "شما اجازه مشاهده همه رزروها را ندارید."},
+            status=status.HTTP_403_FORBIDDEN
+        )
+
+    reservations = get_all_reservations()
+
+    serializer = ReservationSerializer(
+        reservations,
+        many=True
+    )
+
+    return Response(
+        serializer.data,
+        status=status.HTTP_200_OK
+    )
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def reservation_history_api(request, reservation_id):
+    if not request.user.has_perm(
+        "reservations.can_view_all_reservations"
+    ):
+        return Response(
+            {"detail": "شما اجازه مشاهده تاریخچه رزروها را ندارید."},
+            status=status.HTTP_403_FORBIDDEN
+        )
+
+    reservation = get_object_or_404(
+        get_all_reservations(),
+        id=reservation_id
+    )
+
+    histories = get_reservation_history(
+        reservation
+    )
+
+    serializer = ReservationHistorySerializer(
+        histories,
+        many=True
+    )
+
+    return Response(
+        serializer.data,
         status=status.HTTP_200_OK
     )
