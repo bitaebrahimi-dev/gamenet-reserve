@@ -26,3 +26,16 @@ class ReservationSerializer(serializers.ModelSerializer):
             "status",
             "created_at",
         ]
+
+
+class ReservationStatusSerializer(serializers.Serializer):
+    status = serializers.ChoiceField(
+        choices=Reservation.STATUS_CHOICES
+    )
+
+    reason = serializers.CharField(
+        required=False,
+        allow_blank=True,
+        default=""
+    )
+

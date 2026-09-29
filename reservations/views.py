@@ -26,8 +26,10 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
 
-from .serializers import ReservationSerializer
-
+from .serializers import (
+    ReservationSerializer,
+    ReservationStatusSerializer,
+)
 
 @login_required
 def reservation_create(request, device_id):
@@ -221,4 +223,91 @@ def reservation_create_api(request, device_id):
     return Response(
         output_serializer.data,
         status=status.HTTP_201_CREATED
+    )
+
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def cancel_reservation_api(request, reservation_id):
+    reservation = get_object_or_404(
+        Reservation,
+        id=reservation_id
+    )
+
+    try:
+        reservation = cancel_reservation_by_customer(
+            reservation=reservation,
+            user=request.user
+        )
+
+    except ValidationError as e:
+        return Response(
+            {
+                "detail": e.messages[0]
+            },
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    output_serializer = ReservationSerializer(
+        reservation
+    )
+
+    return Response(
+        output_serializer.data,
+        status=status.HTTP_200_OK
+    )
+
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def update_reservation_status_api(request, reservation_id):
+
+    if not request.user.has_perm(
+        "reservations.can_change_reservation_status"
+    ):
+        return Response(
+            {
+                "detail": "شما اجازه تغییر وضعیت رزرو را ندارید."
+            },
+            status=status.HTTP_403_FORBIDDEN
+        )
+
+    reservation = get_object_or_404(
+        Reservation,
+        id=reservation_id
+    )
+
+    serializer = ReservationStatusSerializer(
+        data=request.data
+    )
+
+    if not serializer.is_valid():
+        return Response(
+            serializer.errors,
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    try:
+        reservation = update_reservation_status(
+            reservation=reservation,
+            status=serializer.validated_data["status"],
+            user=request.user,
+            reason=serializer.validated_data["reason"],
+        )
+
+    except ValidationError as e:
+        return Response(
+            {
+                "detail": e.messages[0]
+            },
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    output_serializer = ReservationSerializer(
+        reservation
+    )
+
+    return Response(
+        output_serializer.data,
+        status=status.HTTP_200_OK
     )
