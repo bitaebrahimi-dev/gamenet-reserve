@@ -37,6 +37,10 @@ from .selectors import (
     get_user_reservation,
     get_reservation_history,
 )
+from .permissions import (
+    CanViewAllReservations,
+    CanChangeReservationStatus,
+)
 
 
 @login_required
@@ -267,19 +271,11 @@ def cancel_reservation_api(request, reservation_id):
 
 
 @api_view(["POST"])
-@permission_classes([IsAuthenticated])
+@permission_classes([
+    IsAuthenticated,
+    CanChangeReservationStatus
+])
 def update_reservation_status_api(request, reservation_id):
-
-    if not request.user.has_perm(
-        "reservations.can_change_reservation_status"
-    ):
-        return Response(
-            {
-                "detail": "شما اجازه تغییر وضعیت رزرو را ندارید."
-            },
-            status=status.HTTP_403_FORBIDDEN
-        )
-
     reservation = get_object_or_404(
         Reservation,
         id=reservation_id
@@ -364,16 +360,11 @@ def reservation_detail_api(request, reservation_id):
 
 
 @api_view(["GET"])
-@permission_classes([IsAuthenticated])
+@permission_classes([
+    IsAuthenticated,
+    CanViewAllReservations
+])
 def all_reservations_api(request):
-    if not request.user.has_perm(
-        "reservations.can_view_all_reservations"
-    ):
-        return Response(
-            {"detail": "شما اجازه مشاهده همه رزروها را ندارید."},
-            status=status.HTTP_403_FORBIDDEN
-        )
-
     reservations = get_all_reservations()
 
     serializer = ReservationSerializer(
@@ -388,16 +379,11 @@ def all_reservations_api(request):
 
 
 @api_view(["GET"])
-@permission_classes([IsAuthenticated])
+@permission_classes([
+    IsAuthenticated,
+    CanViewAllReservations
+])
 def reservation_history_api(request, reservation_id):
-    if not request.user.has_perm(
-        "reservations.can_view_all_reservations"
-    ):
-        return Response(
-            {"detail": "شما اجازه مشاهده تاریخچه رزروها را ندارید."},
-            status=status.HTTP_403_FORBIDDEN
-        )
-
     reservation = get_object_or_404(
         get_all_reservations(),
         id=reservation_id
