@@ -36,7 +36,7 @@ class ReservationTestCase(TestCase):
         form = ReservationForm(form_data)
         self.assertTrue(form.is_valid())
         reservation = create_reservation(
-            form=form,
+            **form.cleaned_data,
             user=self.user,
             device=self.device
         )
@@ -61,9 +61,10 @@ class ReservationTestCase(TestCase):
             'end_time': time(16, 0),
         }
         form = ReservationForm(form_data)
+        self.assertTrue(form.is_valid())
         with self.assertRaises(ValidationError):
             create_reservation(
-                form=form,
+                **form.cleaned_data,
                 user=self.user,
                 device=self.device
             )
@@ -75,9 +76,10 @@ class ReservationTestCase(TestCase):
             'end_time': time(14, 0),
         }
         form = ReservationForm(form_data)
+        self.assertTrue(form.is_valid())
         with self.assertRaises(ValidationError):
             create_reservation(
-                form=form,
+                **form.cleaned_data,
                 user=self.user,
                 device=self.device
             )
@@ -98,7 +100,7 @@ class ReservationTestCase(TestCase):
         self.assertTrue(form.is_valid())
         with self.assertRaises(ValidationError):
             create_reservation(
-                form=form,
+                **form.cleaned_data,
                 user=self.user,
                 device=inactive_device
             )
@@ -112,7 +114,7 @@ class ReservationTestCase(TestCase):
         first_form = ReservationForm(first_form_data)
         self.assertTrue(first_form.is_valid())
         create_reservation(
-            form=first_form,
+            **first_form.cleaned_data,
             user=self.user,
             device=self.device
         )
@@ -125,7 +127,7 @@ class ReservationTestCase(TestCase):
         self.assertTrue(second_form.is_valid())
         with self.assertRaises(ValidationError):
             create_reservation(
-                form=second_form,
+                **second_form.cleaned_data,
                 user=self.user,
                 device=self.device
             )
@@ -139,7 +141,7 @@ class ReservationTestCase(TestCase):
         form = ReservationForm(form_data)
         self.assertTrue(form.is_valid())
         reservation = create_reservation(
-            form=form,
+            **form.cleaned_data,
             user=self.user,
             device=self.device
         )
@@ -186,7 +188,7 @@ class ReservationTestCase(TestCase):
         form = ReservationForm(form_data)
         self.assertTrue(form.is_valid())
         reservation = create_reservation(
-            form=form,
+            **form.cleaned_data,
             user=self.user,
             device=self.device
         )
@@ -212,7 +214,7 @@ class ReservationTestCase(TestCase):
         self.assertTrue(form.is_valid())
 
         reservation = create_reservation(
-            form=form,
+            **form.cleaned_data,
             user=self.user,
             device=self.device
         )
@@ -270,7 +272,7 @@ class ReservationTestCase(TestCase):
         self.assertTrue(form.is_valid())
 
         reservation = create_reservation(
-            form=form,
+            **form.cleaned_data,
             user=self.user,
             device=self.device
         )
@@ -312,7 +314,7 @@ class ReservationTestCase(TestCase):
         self.assertTrue(form.is_valid())
 
         reservation = create_reservation(
-            form=form,
+            **form.cleaned_data,
             user=self.user,
             device=self.device
         )
@@ -336,3 +338,4 @@ class ReservationTestCase(TestCase):
                 reservation=reservation,
                 user=self.user
             )
+
