@@ -15,13 +15,15 @@ class Reservation(models.Model):
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        verbose_name='کاربر'
+        verbose_name='کاربر',
+        related_name='reservations'
     )
 
     device = models.ForeignKey(
         Device,
         on_delete=models.CASCADE,
-        verbose_name='دستگاه'
+        verbose_name='دستگاه',
+        related_name='reservations'
     )
 
     reservation_date = models.DateField(
