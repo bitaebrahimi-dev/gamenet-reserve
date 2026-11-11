@@ -6,11 +6,12 @@ from django.contrib.auth.decorators import (
     permission_required
 )
 from .forms import DeviceForm
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 
 from .serializers import DeviceSerializer
 from rest_framework import status
+from .permissions import CanAddDeviceOrReadOnly
 
 
 def device_detail(request, device_id):
@@ -128,6 +129,7 @@ def device_update(request, device_id):
 
 
 @api_view(["GET", "POST"])
+@permission_classes([CanAddDeviceOrReadOnly])
 def device_list_api(request):
     if request.method == "GET":
         if request.user.has_perm('devices.change_device'):

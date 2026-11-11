@@ -1,0 +1,13 @@
+from rest_framework.permissions import BasePermission, SAFE_METHODS
+
+
+class CanAddDeviceOrReadOnly(BasePermission):
+
+    def has_permission(self, request, view):
+        if request.method in SAFE_METHODS:
+            return True
+
+        return (request.user.is_authenticated
+        and request.user.has_perm(
+           "devices.add_device" )
+                )
